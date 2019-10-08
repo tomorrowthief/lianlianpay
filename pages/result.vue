@@ -48,7 +48,7 @@ export default {
     this.timer = setInterval(() => {
         if (this.ticket <= 0) {
             clearInterval(this.timer)
-            // this.$router.replace('/')
+            this.$router.replace('/')
             return
         }
         this.ticket -= 1

@@ -1,8 +1,16 @@
 const Koa = require('koa')
-const consola = require('consola')
+const Router = require('koa-router')
 const { Nuxt, Builder } = require('nuxt')
+const axios = require('axios')
+const moment = require('moment')
+const bodyParser = require('koa-bodyparser')
+const { sign, verify } = require('./utils/crypto')
+const Utils = require('./utils/utils');
+
 
 const app = new Koa()
+const router = new Router()
+
 
 // Import and Set Nuxt.js options
 const config = require('../nuxt.config.js')
@@ -25,12 +33,70 @@ async function start () {
     await nuxt.ready()
   }
 
+  app.use(bodyParser());
 
-  app.use((ctx) => {
-    console.log(ctx.request.url);
-    if (/\/api/.test(ctx.request.url)) {
-
+  app.use(async (ctx, next) => {
+    // check userInfo
+    const cookie = ctx.cookies.get('JESSIONID');
+    if (cookie) {
+      ctx.status = 302
+      ctx.body=  {"code": 302, "data": true, "message": "success login"}
+    } else {
+      await next()
     }
+  })
+
+  router.post('/api/login', async (ctx, next) => {
+    // 简化login流程 只通过cookie验证 实际一般通过session来做
+    // setCookie
+    ctx.cookies.set('JSESSIONID', 'sessionId');
+    ctx.body = {"code": 200, "data": {"username": "lzx"}, "message": "success login"}
+  })
+
+  router.post('/api/logout', async (ctx, next) => {
+    // setCookie
+    ctx.cookies.set('JSESSIONID', '');
+    ctx.body = {"code": 200, "data": true, "message": "success logout"}
+  })
+
+  router.post('/api/pay', async (ctx, next) => {
+    // 参数写死
+    const param = {
+      "api_version": "1.0",
+      "sign_type": "RSA",
+      "time_stamp": moment().format('YYYYMMDDHHMMSS'),
+      "oid_partner": "201408071000001539",
+      "user_id": "lzx_test_user000001",
+      "busi_partner": "101001",
+      "no_order": ctx.request.body.orderId,
+      "dt_order": moment().subtract(1, 'minutes').format('YYYYMMDDHHMMSS'),
+      "name_goods": "lzx测试",
+      "money_order": ctx.request.body.money || '0.01',
+      "notify_url": "http://test.lianlianpay.com.cn/help/notify.php",
+      "risk_item": "{\"user_info_bind_phone\":\"15658020589\",\"user_info_dt_register\":\"20181030122130\",\"frms_ware_category \":\"1009\"}",
+      "flag_pay_product": ctx.request.body.pay_type || '2',
+      "flag_chnl": "2",
+      "url_return": ctx.request.body.url_return
+    };
+
+    // 生成签名原串
+    const sign_str = Utils.objSortAndUrlStr(param);
+
+    // 获取签名
+    const signed_str = sign(sign_str);
+
+    // 加入参数
+    param.sign = signed_str;
+
+    const { data } = await axios.post('	https://payserverapi.lianlianpay.com/v1/paycreatebill', param);
+    ctx.status = 200
+    ctx.body = {"code": 200, "data": data, "message": "pay result"}
+  })
+  
+  app.use(router.routes())
+
+
+  app.use(async (ctx, next) => {
     ctx.status = 200
     ctx.respond = false // Bypass Koa's built-in response handling
     ctx.req.ctx = ctx // This might be useful later on, e.g. in nuxtServerInit or with nuxt-stash

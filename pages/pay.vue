@@ -1,15 +1,84 @@
 <template>
   <div class="container">
     <div>
-      <p>pay</p>
+      
+      <a-form
+        :form="form"
+      >
+        <a-form-item
+          label="金额"
+          :label-col="{ span: 12 }"
+          :wrapper-col="{ span: 12 }"
+        >
+          <a-input-number
+            v-decorator="[
+              'money',
+              {rules: [{ required: true, message: 'Please input your money!' }]}
+            ]"
+          />
+        </a-form-item>
+        <a-form-item
+          label="支付方式"
+          :label-col="{ span: 12 }"
+          :wrapper-col="{ span: 12 }"
+        >
+        <a-radio-group
+          v-decorator="[
+            'pay_type',
+            {rules: [{ required: true, message: 'Please select pay_type!' }]}
+          ]"
+        >
+          <a-radio-button value="2">网银支付</a-radio-button>
+          <a-radio-button value="0">快捷支付</a-radio-button>
+        </a-radio-group>
+        </a-form-item>
+        <a-form-item>
+          <a-button type="primary" @click="goPay">去支付</a-button>
+        </a-form-item>
+      </a-form>  
     </div>
   </div>
 </template>
 
 <script>
-
 export default {
-  
+  data: () => ({
+    formLayout: 'horizontal',
+    form: null
+  }),
+  created() {
+    this.form = this.$form.createForm(this)
+  },
+  methods: {
+    goPay() {
+      // this.form.validateFields(
+      //   (err, { money, pay_type }) => {
+      //     if (!err) {
+      //       this.$store.dispatch('pay', {
+      //         money,
+      //         pay_type,
+      //         orderId: `lzx_test_${Date.now()}`,
+      //         url_return: `${window.location.origin}/result?info=${JSON.stringify({
+      //           money,
+      //           pay_type,
+      //           orderId: `lzx_test_${Date.now()}`,
+      //         })}`
+      //       })
+      //     }
+      //   },
+      // );
+      console.log(`${window.location.origin}/result?info=${encodeURIComponent(JSON.stringify({
+                money: 1,
+                pay_type: 1,
+                orderId: `lzx_test_${Date.now()}`,
+              }))}`)
+      // window.location.href = `${window.location.origin}/result?info=${encodeURIComponent(JSON.stringify({
+      //           money: 1,
+      //           pay_type: 1,
+      //           orderId: `lzx_test_${Date.now()}`,
+      //         }))}`
+    }
+  }
 }
 </script>
 

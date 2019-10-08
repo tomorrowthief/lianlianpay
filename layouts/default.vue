@@ -1,8 +1,35 @@
 <template>
   <div>
+    <Header :title="title" />
     <nuxt />
   </div>
 </template>
+
+<script>
+import Header from './Header.vue'
+import route from '../config/route';
+
+export default {
+  data: () => ({
+    title: 'title'
+  }),
+  components: {
+    Header
+  },
+  watch: {
+    $route: {
+        handler: function(val, oldVal){
+          if (val.name !== oldVal.name) this.title=route[val.name]
+        },
+        // 深度观察监听
+        deep: true
+    }
+  },
+  mounted() {
+    this.title=route[this.$route.name]
+  }
+}
+</script>
 
 <style>
 html {

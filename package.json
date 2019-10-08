@@ -11,10 +11,16 @@
     "generate": "nuxt generate"
   },
   "dependencies": {
-    "nuxt": "^2.0.0",
+    "ant-design-vue": "^1.1.10",
+    "axios": "^0.19.0",
     "cross-env": "^5.2.0",
+    "js-cookie": "^2.2.1",
     "koa": "^2.6.2",
-    "ant-design-vue": "^1.1.10"
+    "koa-bodyparser": "^4.2.1",
+    "koa-router": "^7.4.0",
+    "koa-session": "^5.12.3",
+    "moment": "^2.24.0",
+    "nuxt": "^2.0.0"
   },
   "devDependencies": {
     "nodemon": "^1.18.9"

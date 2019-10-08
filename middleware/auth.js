@@ -1,6 +1,9 @@
-export default function ({ route, store, redirect }) {
-    console.log(store.state.authUser && store.state.authUser.username);
-    if (!store.state.authUser && route.name !== 'login') {
-        // return redirect('/login')
+export default async function ({ route, store, redirect }) {
+    // 采用 session简化形式登录
+    // 状态树中无用户信息时
+    if (!store.state.authUser) {
+        const userInfo =  await store.dispatch('getUserInfo')
+        //  约定状态码302为登陆态失效
+        if (userInfo.code === 302 && route.name !== 'login') redirect('/login')
     }
  }

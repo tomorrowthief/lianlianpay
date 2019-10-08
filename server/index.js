@@ -37,25 +37,36 @@ async function start () {
 
   app.use(async (ctx, next) => {
     // check userInfo
-    const cookie = ctx.cookies.get('JESSIONID');
-    if (cookie) {
-      ctx.status = 302
-      ctx.body=  {"code": 302, "data": true, "message": "success login"}
+    const cookie = ctx.cookies.get('JSESSIONID');
+    if (!cookie) {
+      ctx.body=  {"code": 302, "data": true, "message": "not login"}
+      await next()
     } else {
       await next()
     }
   })
 
+  router.post('/api/userInfo', (ctx, next) => {
+    // 简化login流程 只通过是否有cookie, 正常是通过cookie保存sessionId来验证
+    const cookie = ctx.cookies.get('JSESSIONID');
+    ctx.body = {"code": cookie ? 200 : 302, "data": {"username": "lzx"}, "message": "user info"}
+  })
+
   router.post('/api/login', async (ctx, next) => {
-    // 简化login流程 只通过cookie验证 实际一般通过session来做
-    // setCookie
-    ctx.cookies.set('JSESSIONID', 'sessionId');
+    // 简化login流程 只通过是否有cookie, 正常是通过cookie保存sessionId来验证
+    // setCookie 设置
+    ctx.cookies.set('JSESSIONID', 'sessionId', {
+      maxAge: 60 * 60 * 1000,   // cookie有效时长
+      httpOnly:false
+    });
     ctx.body = {"code": 200, "data": {"username": "lzx"}, "message": "success login"}
   })
 
   router.post('/api/logout', async (ctx, next) => {
-    // setCookie
-    ctx.cookies.set('JSESSIONID', '');
+    // setCookie 清理
+    ctx.cookies.set('JSESSIONID', '', {
+      maxAge: 0,   // cookie有效时长
+    });
     ctx.body = {"code": 200, "data": true, "message": "success logout"}
   })
 
@@ -69,7 +80,7 @@ async function start () {
       "user_id": "lzx_test_user000001",
       "busi_partner": "101001",
       "no_order": ctx.request.body.orderId,
-      "dt_order": moment().subtract(1, 'minutes').format('YYYYMMDDHHMMSS'),
+      "dt_order": moment().format('YYYYMMDDHHMMSS'),
       "name_goods": "lzx测试",
       "money_order": ctx.request.body.money || '0.01',
       "notify_url": "http://test.lianlianpay.com.cn/help/notify.php",

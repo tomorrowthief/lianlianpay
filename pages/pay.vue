@@ -33,7 +33,7 @@
         </a-radio-group>
         </a-form-item>
         <a-form-item>
-          <a-button type="primary" @click="goPay">去支付</a-button>
+          <a-button type="primary" :disabled="loading" @click="goPay">{{ loading ? '处理中' : '去支付' }}</a-button>
         </a-form-item>
       </a-form>  
     </div>
@@ -44,39 +44,33 @@
 export default {
   data: () => ({
     formLayout: 'horizontal',
-    form: null
+    form: null,
+    loading: false
   }),
   created() {
     this.form = this.$form.createForm(this)
   },
   methods: {
     goPay() {
-      // this.form.validateFields(
-      //   (err, { money, pay_type }) => {
-      //     if (!err) {
-      //       this.$store.dispatch('pay', {
-      //         money,
-      //         pay_type,
-      //         orderId: `lzx_test_${Date.now()}`,
-      //         url_return: `${window.location.origin}/result?info=${JSON.stringify({
-      //           money,
-      //           pay_type,
-      //           orderId: `lzx_test_${Date.now()}`,
-      //         })}`
-      //       })
-      //     }
-      //   },
-      // );
-      console.log(`${window.location.origin}/result?info=${encodeURIComponent(JSON.stringify({
-                money: 1,
-                pay_type: 1,
+      this.form.validateFields(
+        (err, { money, pay_type }) => {
+          if (!err && !this.loading) {
+            this.loading = true;
+            this.$store.dispatch('pay', {
+              money,
+              pay_type,
+              orderId: `lzx_test_${Date.now()}`,
+              url_return: `${window.location.origin}/result?info=${encodeURIComponent(JSON.stringify({
+                money,
+                pay_type,
                 orderId: `lzx_test_${Date.now()}`,
-              }))}`)
-      // window.location.href = `${window.location.origin}/result?info=${encodeURIComponent(JSON.stringify({
-      //           money: 1,
-      //           pay_type: 1,
-      //           orderId: `lzx_test_${Date.now()}`,
-      //         }))}`
+              }))}`
+            }).then(res => {
+              this.loading = false;
+            })
+          }
+        },
+      );
     }
   }
 }

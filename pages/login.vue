@@ -28,7 +28,7 @@ export default {
         password: this.password
       });
       if (result.code === 200) {
-        console.log(this.$router.push('/'));
+        this.$router.push('/')
       }
     }
   }

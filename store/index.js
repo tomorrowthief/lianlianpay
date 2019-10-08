@@ -8,14 +8,15 @@ export const state = () => {
 
 export const mutations = {
     SET_USER (state, user) {
-        state.authUser = user
+      state.authUser = user
     }
 }
 
 export const actions = {
-  nuxtServerInit({ commit}, { req }) {
-    let cookie = req.headers.cookie;
-    console,log(cookie);
+  async getUserInfo({ commit }) {
+    const { data } = await axios.post('/api/userInfo');
+    commit('SET_USER', data.data)
+    return data;
   },
 
   async login ({ commit }, { username, password }) {
@@ -35,14 +36,13 @@ export const actions = {
   },
 
   async logout ({ commit }) {
-    const { data } = await axios.post('/api/logout');
+    const { data } = await axios.post('/api/logout')
     commit('SET_USER', null)
     return data;
   },
 
   async pay ({ commit }, param) {
-    console.log(param);
-    const { data } = await axios.post('/api/pay', param);
+    const { data } = await axios.post('/api/pay', param)
     if (data.code === 200) {
       if (Number(data.data.ret_code) === 0 && data.data.gateway_url)  window.location.href = data.data.gateway_url
     }

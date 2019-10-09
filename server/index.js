@@ -49,7 +49,7 @@ async function start () {
   router.post('/api/userInfo', (ctx, next) => {
     // 简化login流程 只通过是否有cookie, 正常是通过cookie保存sessionId来验证
     const cookie = ctx.cookies.get('JSESSIONID');
-    ctx.body = {"code": cookie ? 200 : 302, "data": {"username": "lzx"}, "message": "user info"}
+    ctx.body = {"code": cookie ? 200 : 302, "data": cookie ? {"username": "lzx"} : null, "message": "user info"}
   })
 
   router.post('/api/login', async (ctx, next) => {

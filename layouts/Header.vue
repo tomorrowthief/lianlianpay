@@ -25,6 +25,9 @@ export default {
           return this.$store.state.authUser
       }
   },
+  mounted() {
+      console.log(this.$store.state.authUser)
+  },
   methods: {
       async logout() {
             const result = await this.$store.dispatch('logout');
